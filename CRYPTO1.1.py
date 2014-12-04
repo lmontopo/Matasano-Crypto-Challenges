@@ -12,6 +12,9 @@ def hex_to_byte(string):
 def hex_to_bytearray(string):
 	return bytearray(bytes.fromhex(string))
 
+def string_to_bytearray(string):
+    return bytearray(string, "ascii")
+
 def bytearray_to_hex(barray):
 	return binascii.hexlify(barray)
 
@@ -99,7 +102,15 @@ best = sorted(map(scoringLambda, file), key = lambda top : scoring(top[1]), reve
 
 print("Challenge # 4 Result: ", best)
 
-#for line in file:
-    #barray = hex_to_bytearray(line.rstrip())
-    #top = topScoring(barray)
-    #print(scoring(top[1]), top[0], top[1])
+# ------------ THIRD CHALLENGE ---------------------- #
+
+stance = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
+
+barray = string_to_bytearray(stance)
+key = string_to_bytearray("ICE");
+
+for i in range(0, len(barray)):
+    barray[i] = key[i % 3] ^ barray[i]
+
+#print("b'0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f")
+print("Challenge # 5 Result: ", bytearray_to_hex(barray))
