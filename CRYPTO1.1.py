@@ -79,15 +79,27 @@ scoring_table = {
 }
 
 
-top = sorted([[i, bytearray(x ^ i for x in barray)] for i in range(255)], 
+def topScoring(barray):
+    return sorted([[i, bytearray(x ^ i for x in barray)] for i in range(255)], 
 		key = lambda pair : scoring(pair[1]), reverse = True)[0]
 
 
+top = topScoring(barray)
 print("Challenge # 3 Result: ", scoring(top[1]), top[0], top[1])
 
 
+# ------------ THIRD CHALLENGE ---------------------- #
 
+file = open("4.txt", "r")
 
+count = 0
+topScore = 0
+scoringLambda = lambda line : topScoring(hex_to_bytearray(line.rstrip()))
+best = sorted(map(scoringLambda, file), key = lambda top : scoring(top[1]), reverse = True)[0]
 
+print("Challenge # 4 Result: ", best)
 
-
+#for line in file:
+    #barray = hex_to_bytearray(line.rstrip())
+    #top = topScoring(barray)
+    #print(scoring(top[1]), top[0], top[1])
