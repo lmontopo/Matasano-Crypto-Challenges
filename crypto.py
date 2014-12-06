@@ -2,31 +2,35 @@
 import base64
 import binascii
 
-# ------------ FIRST CHALLENGE ------------------------ #
-
-hex_string = '49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d'
+def test(expected, result, set, challenge):
+    assert (expected == result), "Set#{0} Challenge#{1} failed. \nIs:     {2}\nShould: {3}".format(set, challenge, result, expected)
+    print("Set#{0} Challenge#{1} passed".format(set, challenge))
 
 def hex_to_byte(string):
-	return bytes.fromhex(string)
+    return bytes.fromhex(string)
 
 def hex_to_bytearray(string):
-	return bytearray(bytes.fromhex(string))
+    return bytearray(bytes.fromhex(string))
 
 def string_to_bytearray(string):
     return bytearray(string, "ascii")
 
 def bytearray_to_hex(barray):
-	return binascii.hexlify(barray)
-
+    return binascii.hexlify(barray)
 
 def base_64(bytes):
-	return base64.b64encode(bytes)
-print ("Challenge # 1 Result: ", base_64(hex_to_bytearray(hex_string)))
+    return base64.b64encode(bytes)
 
+# ------------ FIRST CHALLENGE ------------------------ #
 
+input    = '49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d'
+
+expected = b'SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t'
+result   = base_64(hex_to_bytearray(input))
+
+test(expected, result, 1, 1);
 
 # ----------- SECOND CHALLENGE ---------------------- #
-
 
 string_1 = '1c0111001f010100061a024b53535009181c'
 string_2 = '686974207468652062756c6c277320657965'
@@ -36,8 +40,10 @@ byte_2 = hex_to_bytearray(string_2)
 zipped = zip(byte_1, byte_2)
 xor = lambda pair : pair[0] ^ pair[1]
 
-print("Challenge # 2 Result: ", bytearray_to_hex(bytearray(list(map(xor, zipped)))))
+expected = b'746865206b696420646f6e277420706c6179'
+result   = bytearray_to_hex(bytearray(list(map(xor, zipped))))
 
+test(expected, result, 1, 2)
 
 # ------------ THIRD CHALLENGE ---------------------- #
 
@@ -45,11 +51,11 @@ string = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
 barray = hex_to_bytearray(string)
 
 def scoring(barray):
-	score = 0 
-	for byte in barray:
-		if byte in range(65,91) or byte in range(97, 123) or byte == 32:
-			score += scoring_table[chr(byte)] 	
-	return score
+    score = 0 
+    for byte in barray:
+        if byte in range(65,91) or byte in range(97, 123) or byte == 32:
+            score += scoring_table[chr(byte)] 	
+    return score
 
 scoring_table = {
   " " : 20,
@@ -81,17 +87,16 @@ scoring_table = {
   "z" : 1, "Z" : 1
 }
 
-
 def topScoring(barray):
     return sorted([[i, bytearray(x ^ i for x in barray)] for i in range(255)], 
-		key = lambda pair : scoring(pair[1]), reverse = True)[0]
+        key = lambda pair : scoring(pair[1]), reverse = True)[0]
 
+expected = "Cooking MC's like a pound of bacon"
 
 top = topScoring(barray)
-print("Challenge # 3 Result: ", scoring(top[1]), top[0], top[1])
+test(expected, top[1].decode("ascii"), 1, 3)
 
-
-# ------------ THIRD CHALLENGE ---------------------- #
+# ------------ FOURTH CHALLENGE ---------------------- #
 
 file = open("4.txt", "r")
 
@@ -100,9 +105,10 @@ topScore = 0
 scoringLambda = lambda line : topScoring(hex_to_bytearray(line.rstrip()))
 best = sorted(map(scoringLambda, file), key = lambda top : scoring(top[1]), reverse = True)[0]
 
-print("Challenge # 4 Result: ", best)
+expected = "Now that the party is jumping"
+test(expected, best[1].decode("ascii").rstrip(), 1, 4)
 
-# ------------ THIRD CHALLENGE ---------------------- #
+# ------------ FIFTH CHALLENGE ---------------------- #
 
 stance = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
 
@@ -112,5 +118,5 @@ key = string_to_bytearray("ICE");
 for i in range(0, len(barray)):
     barray[i] = key[i % 3] ^ barray[i]
 
-#print("b'0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f")
-print("Challenge # 5 Result: ", bytearray_to_hex(barray))
+expected = b'0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f'
+test(expected, bytearray_to_hex(barray), 1, 5)
