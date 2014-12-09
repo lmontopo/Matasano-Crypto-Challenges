@@ -120,3 +120,30 @@ for i in range(0, len(barray)):
 
 expected = b'0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f'
 test(expected, bytearray_to_hex(barray), 1, 5)
+
+# ------------ SIXTH CHALLENGE ---------------------- #
+
+def hamming(s1, s2):
+    assert(len(s1)==len(s2))
+
+    b1 = string_to_bytearray(s1)
+    b2 = string_to_bytearray(s2)
+
+    different_bits = 0
+    for i in range(len(b1)):
+        byte1 = b1[i]
+        byte2 = b2[i]
+
+        j = 8
+        while j>0:
+            different_bits += ((byte1 & 1) ^ (byte2 & 1))
+            byte1 = byte1 >> 1
+            byte2 = byte2 >> 1
+            j -= 1
+        
+    return different_bits
+
+def normalized_hamming(s1, s2):
+    return hamming(s1, s2)/len(s1)
+
+#print(normalized_hamming("HU", "If"))
