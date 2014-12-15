@@ -102,15 +102,15 @@ test(expected, top[1].decode("ascii"), 1, 3)
 
 # ------------ FOURTH CHALLENGE ---------------------- #
 
-#file = open("4.txt", "r")
+file = open("4.txt", "r")
 
-#count = 0
-#topScore = 0
-#scoringLambda = lambda line : topScoring(hex_to_bytearray(line.rstrip()))
-#best = sorted(map(scoringLambda, file), key = lambda top : scoring(top[1]), reverse = True)[0]
+count = 0
+topScore = 0
+scoringLambda = lambda line : topScoring(hex_to_bytearray(line.rstrip()))
+best = sorted(map(scoringLambda, file), key = lambda top : scoring(top[1]), reverse = True)[0]
 
-#expected = "Now that the party is jumping"
-#test(expected, best[1].decode("ascii").rstrip(), 1, 4)
+expected = "Now that the party is jumping"
+test(expected, best[1].decode("ascii").rstrip(), 1, 4)
 
 # ------------ FIFTH CHALLENGE ---------------------- #
 
@@ -161,11 +161,17 @@ def normalized_hamming(s1, s2):
 
 def key_size(barray):
     keySizes = {}
+    times = 30
     
     for keySize in range(2, 41):
-        b1  = barray[0:keySize]
-        b2 = barray[keySize:keySize*2]
-        keySizes[keySize] = normalized_hamming_bytearray(b1, b2)
+        msum = 0
+        for offset in range(times):
+            left = keySize*2*offset
+            b1   = barray[left:left+keySize]
+            b2   = barray[left+keySize:left+keySize*2]
+            msum += normalized_hamming_bytearray(b1, b2)
+
+        keySizes[keySize] = msum/times
 
     return min(keySizes, key=keySizes.get)
 
@@ -183,11 +189,6 @@ for i in range(math.ceil(len(barray)/key_size)):
     for i in range(len(hblock)):
         blocks[i].append(hblock[i])
 
-#count = 0
-#topScore = 0
-#scoringLambda = lambda line : topScoring(hex_to_bytearray(line.rstrip()))
-#best = sorted(map(scoringLambda, file), key = lambda top : scoring(top[1]), reverse = True)[0]
-
 key = bytearray()
 
 for i in range(key_size):
@@ -195,6 +196,5 @@ for i in range(key_size):
     key.append(k)
 
 decrypt_xor(barray, key);
-print(barray)
-
-#print(hamming("this is a test", "wokka wokka!!!"))
+expected = b'I\'m back'
+test(expected,barray[0:8], 1, 6)
