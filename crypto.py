@@ -1,6 +1,7 @@
 #CRYPTO CHALLENGE 1.1
 import base64
 import binascii
+import math
 
 def test(expected, result, set, challenge):
     assert (expected == result), "Set#{0} Challenge#{1} failed. \nIs:     {2}\nShould: {3}".format(set, challenge, result, expected)
@@ -18,15 +19,18 @@ def string_to_bytearray(string):
 def bytearray_to_hex(barray):
     return binascii.hexlify(barray)
 
-def base_64(bytes):
+def b64encode(bytes):
     return base64.b64encode(bytes)
+
+def b64decode(bytes):
+    return base64.b64decode(bytes)
 
 # ------------ FIRST CHALLENGE ------------------------ #
 
 input    = '49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d'
 
 expected = b'SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t'
-result   = base_64(hex_to_bytearray(input))
+result   = b64encode(hex_to_bytearray(input))
 
 test(expected, result, 1, 1);
 
@@ -98,15 +102,15 @@ test(expected, top[1].decode("ascii"), 1, 3)
 
 # ------------ FOURTH CHALLENGE ---------------------- #
 
-file = open("4.txt", "r")
+#file = open("4.txt", "r")
 
-count = 0
-topScore = 0
-scoringLambda = lambda line : topScoring(hex_to_bytearray(line.rstrip()))
-best = sorted(map(scoringLambda, file), key = lambda top : scoring(top[1]), reverse = True)[0]
+#count = 0
+#topScore = 0
+#scoringLambda = lambda line : topScoring(hex_to_bytearray(line.rstrip()))
+#best = sorted(map(scoringLambda, file), key = lambda top : scoring(top[1]), reverse = True)[0]
 
-expected = "Now that the party is jumping"
-test(expected, best[1].decode("ascii").rstrip(), 1, 4)
+#expected = "Now that the party is jumping"
+#test(expected, best[1].decode("ascii").rstrip(), 1, 4)
 
 # ------------ FIFTH CHALLENGE ---------------------- #
 
@@ -115,20 +119,18 @@ stance = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a c
 barray = string_to_bytearray(stance)
 key = string_to_bytearray("ICE");
 
-for i in range(0, len(barray)):
-    barray[i] = key[i % 3] ^ barray[i]
+def decrypt_xor(barray, key):
+    for i in range(0, len(barray)):
+        barray[i] = key[i % len(key)] ^ barray[i]
+
+decrypt_xor(barray, key)
 
 expected = b'0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f'
 test(expected, bytearray_to_hex(barray), 1, 5)
 
 # ------------ SIXTH CHALLENGE ---------------------- #
 
-def hamming(s1, s2):
-    assert(len(s1)==len(s2))
-
-    b1 = string_to_bytearray(s1)
-    b2 = string_to_bytearray(s2)
-
+def hamming_bytearrays(b1, b2):
     different_bits = 0
     for i in range(len(b1)):
         byte1 = b1[i]
@@ -143,7 +145,56 @@ def hamming(s1, s2):
         
     return different_bits
 
+def hamming(s1, s2):
+    assert(len(s1)==len(s2))
+
+    b1 = string_to_bytearray(s1)
+    b2 = string_to_bytearray(s2)
+
+    return hamming_bytearrays(b1, b2)
+
+def normalized_hamming_bytearray(b1, b2):
+    return hamming_bytearrays(b1, b2)/len(b1)
+
 def normalized_hamming(s1, s2):
     return hamming(s1, s2)/len(s1)
 
-#print(normalized_hamming("HU", "If"))
+def key_size(barray):
+    keySizes = {}
+    
+    for keySize in range(2, 41):
+        b1  = barray[0:keySize]
+        b2 = barray[keySize:keySize*2]
+        keySizes[keySize] = normalized_hamming_bytearray(b1, b2)
+
+    return min(keySizes, key=keySizes.get)
+
+
+file    = open("6.txt", "r")
+content = file.read().replace("\n", "")
+barray  = bytearray(b64decode(string_to_bytearray(content)))
+
+key_size = key_size(barray)
+
+blocks = [bytearray() for i in range(key_size)]
+
+for i in range(math.ceil(len(barray)/key_size)):
+    hblock = barray[key_size*i:key_size*(i+1)]
+    for i in range(len(hblock)):
+        blocks[i].append(hblock[i])
+
+#count = 0
+#topScore = 0
+#scoringLambda = lambda line : topScoring(hex_to_bytearray(line.rstrip()))
+#best = sorted(map(scoringLambda, file), key = lambda top : scoring(top[1]), reverse = True)[0]
+
+key = bytearray()
+
+for i in range(key_size):
+    k = topScoring(blocks[i])[0]
+    key.append(k)
+
+decrypt_xor(barray, key);
+print(barray)
+
+#print(hamming("this is a test", "wokka wokka!!!"))
