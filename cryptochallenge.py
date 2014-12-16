@@ -198,3 +198,14 @@ for i in range(key_size):
 decrypt_xor(barray, key);
 expected = b'I\'m back'
 test(expected,barray[0:8], 1, 6)
+
+# ------------ SEVENTH CHALLENGE ---------------------- #
+
+from Crypto.Cipher import AES
+file    = open("7.txt", "r")
+content = file.read().replace("\n", "")
+
+# Use AES-128. 128 is the key size specified by the 16 bytes/character long key (16*8 = 128)
+cipher = AES.new("YELLOW SUBMARINE", AES.MODE_ECB);
+encrypted = cipher.decrypt(base64.b64decode(content));
+test(expected, encrypted[0:8], 1, 7)
