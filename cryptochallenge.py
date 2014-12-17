@@ -209,3 +209,20 @@ content = file.read().replace("\n", "")
 cipher = AES.new("YELLOW SUBMARINE", AES.MODE_ECB);
 encrypted = cipher.decrypt(base64.b64decode(content));
 test(expected, encrypted[0:8], 1, 7)
+
+# ------------ EIGHTH CHALLENGE ---------------------- #
+
+file    = open("8.txt", "r")
+for line in file:
+    barray = hex_to_bytearray(line.rstrip())
+    keySize = 16
+    n    = 5 
+    msum = 0
+    for offset in range(n):
+        left = keySize*2*offset
+        b1   = barray[left:left+keySize]
+        b2   = barray[left+keySize:left+keySize*2]
+        msum += normalized_hamming_bytearray(b1, b2)
+    avg = msum/n
+    if(avg < 3):
+        print(avg)
