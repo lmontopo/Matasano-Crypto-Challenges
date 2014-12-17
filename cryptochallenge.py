@@ -212,17 +212,24 @@ test(expected, encrypted[0:8], 1, 7)
 
 # ------------ EIGHTH CHALLENGE ---------------------- #
 
-file    = open("8.txt", "r")
-for line in file:
-    barray = hex_to_bytearray(line.rstrip())
-    keySize = 16
-    n    = 5 
-    msum = 0
-    for offset in range(n):
-        left = keySize*2*offset
-        b1   = barray[left:left+keySize]
-        b2   = barray[left+keySize:left+keySize*2]
-        msum += normalized_hamming_bytearray(b1, b2)
-    avg = msum/n
-    if(avg < 3):
-        print(avg)
+def find_aes(filename):
+  file    = open(filename, "r")
+  for line in file:
+      barray = hex_to_bytearray(line.rstrip())
+      keySize = 16
+      counter = 0
+      for x in range(math.floor(len(barray)/keySize)):
+          for y in range(x + 1, math.floor((len(barray)/keySize)) + 1):
+            b1   = barray[x * keySize: (x + 1) * keySize]
+            b2   = barray[y * keySize: (y + 1) * keySize]
+            if b1 == b2:
+              counter += 1
+      if counter > 0:
+        return True
+  return False
+
+test(True, find_aes("8.txt"), 1, 8)
+
+
+
+
